@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceriyar Of Life - Mega Agent System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #001282;
+            --orange-tag: #ff9800;
+            --card-bg: #b5bce0;
+            --text-pink: #e91e63;
+            --bg-dark: #000b4a;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--primary); padding: 12px;
+            display: flex; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .header i { font-size: 1.1rem; cursor: pointer; margin-right: 15px; }
+
+        .main-content { padding: 15px 15px 100px 15px; }
+        
+        .rules-container {
+            background: rgba(255, 255, 255, 0.1); border: 1.5px solid var(--orange-tag);
+            border-radius: 12px; padding: 12px; margin-bottom: 20px;
+        }
+        .rules-title { color: #ffeb3b; font-weight: bold; margin-bottom: 8px; font-size: 0.9rem; }
+        .rules-list { list-style: none; padding: 0; font-size: 0.8rem; line-height: 1.5; }
+        .rules-list li { margin-bottom: 5px; display: flex; align-items: flex-start; }
+        .rules-list i { color: var(--orange-tag); margin-right: 8px; margin-top: 2px; }
+
+        .level-card {
+            background: var(--card-bg); border-radius: 15px; margin-bottom: 20px;
+            overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        .bonus-tag { background: var(--orange-tag); color: white; padding: 8px 20px; font-weight: bold; border-bottom-right-radius: 40px; display: inline-block; font-size: 0.9rem; }
+        .reward-amount { float: right; color: var(--text-pink); font-size: 1.5rem; font-weight: bold; margin-right: 12px; margin-top: 4px; }
+        .info-row { background: rgba(255, 255, 255, 0.6); margin: 8px 12px; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; color: #333; font-size: 0.85rem; }
+        .stat-container { display: flex; justify-content: space-around; padding: 8px 0; text-align: center; color: #333; font-size: 0.9rem; }
+        .btn-claim { background: #90a4ae; color: white; border: none; width: 85%; margin: 8px auto 15px; display: block; padding: 10px; border-radius: 30px; font-weight: bold; font-size: 1rem; }
+
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top-left-radius: 20px; border-top-right-radius: 20px; text-align: center; color: #333; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); z-index: 100; }
+        .link-area { background: #f1f3f4; padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin: 8px 0; border: 1px dashed var(--primary); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <i class="fas fa-university"></i>
+    <span style="font-weight: bold; letter-spacing: 0.5px; font-size: 0.9rem;">CERIYAR OF LIFE</span>
+</div>
+
+<div class="main-content">
+    <div class="rules-container">
+        <div class="rules-title"><i class="fas fa-shield-alt"></i> मंथली रिवॉर्ड नियम</div>
+        <ul class="rules-list">
+            <li><i class="fas fa-check-circle"></i> 30 दिन में <b>₹300 रिचार्ज</b> अनिवार्य।</li>
+            <li><i class="fas fa-check-circle"></i> डायरेक्ट इन्वाइट रिवॉर्ड: <b>₹50</b>।</li>
+        </ul>
+    </div>
+    <div id="level-list"></div>
+</div>
+
+<div class="footer">
+    <div class="link-area"><span id="linkText">ceriyaroflife.netlify.app</span><i class="fas fa-copy" onclick="copy()" style="color:var(--primary)"></i></div>
+    <p style="font-size:0.7rem; margin:0; color:#666;">Earn ₹50 per valid invitation</p>
+</div>
+
+<script>
+    const levels = [
+        { lvl: 1, target: 2, reward: 100 }, { lvl: 2, target: 4, reward: 200 },
+        { lvl: 3, target: 10, reward: 500 }, { lvl: 4, target: 30, reward: 1500 },
+        { lvl: 5, target: 50, reward: 2500 }, { lvl: 6, target: 75, reward: 3750 },
+        { lvl: 7, target: 100, reward: 5000 }, { lvl: 8, target: 200, reward: 10000 },
+        { lvl: 9, target: 500, reward: 25000 }, { lvl: 10, target: 1000, reward: 50000 },
+        { lvl: 11, target: 5000, reward: 250000 }, { lvl: 12, target: 10000, reward: 500000 }
+    ];
+    const container = document.getElementById('level-list');
+    levels.forEach(item => {
+        container.innerHTML += `
+            <div class="level-card" id="lvl-card-${item.lvl}">
+                <div class="bonus-tag">Bonus ${item.lvl}</div><div class="reward-amount">₹${item.reward.toLocaleString('en-IN')}</div>
+                <div class="info-row"><span>Target</span><b>${item.target}</b></div>
+                <div class="info-row"><span>Deposit</span><b style="color:red">₹300</b></div>
+                <div class="stat-container">
+                    <div><b class="invite-count">0/${item.target}</b><br><small>Invitees</small></div>
+                    <div><b class="valid-count">0/${item.target}</b><br><small>Valid</small></div>
+                </div>
+                <button class="btn-claim">UNFINISHED</button>
+            </div>`;
+    });
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC71sziJtMeDStHKguWtKmqlXe7vPp9Sn0",
+        authDomain: "login-wallet-701fc.firebaseapp.com",
+        databaseURL: "https://login-wallet-701fc-default-rtdb.firebaseio.com",
+        projectId: "login-wallet-701fc",
+        storageBucket: "login-wallet-701fc.firebasestorage.app",
+        messagingSenderId: "897194192275",
+        appId: "1:897194192275:web:8ec6b67f49ba7c925b4c66"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const userId = "9876";
+
+    // लेवल्स डेटा अपडेट
+    onValue(ref(db, `gangaUsers/${userId}`), (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            const teamSize = data.team || 0;
+            document.querySelectorAll('.invite-count').forEach((el, index) => {
+                el.innerText = teamSize + "/" + levels[index].target;
+            });
+            document.querySelectorAll('.valid-count').forEach((el, index) => {
+                el.innerText = teamSize + "/" + levels[index].target;
+            });
+
+            // बटन कलर अपडेट (अगर टारगेट पूरा हो जाए)
+            document.querySelectorAll('.btn-claim').forEach((btn, index) => {
+                if(teamSize >= levels[index].target) {
+                    btn.innerText = "CLAIM NOW";
+                    btn.style.backgroundColor = "var(--orange-tag)";
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    function copy() { navigator.clipboard.writeText(document.getElementById('linkText').innerText); alert("Link Copied!"); }
+</script>
+</body>
+</html>

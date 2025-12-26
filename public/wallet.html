@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceriyar Wallet - Premium ATM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root { --primary: #1a2a6c; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; justify-content: center; }
+        .mobile-frame { width: 100%; max-width: 450px; min-height: 100vh;  }
+
+        /* ATM Card Style */
+        .atm-container { padding: 15px; }
+        .atm-card {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white; padding: 25px 20px; border-radius: 18px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+        .card-chip { width: 45px; height: 35px; background: linear-gradient(135deg, #ffd700, #b8860b); border-radius: 6px; margin-bottom: 20px; }
+        .card-number { font-family: 'Courier New', monospace; font-size: 1.4rem; letter-spacing: 3px; margin-bottom: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .card-holder { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .bal-amt { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
+
+        /* Action Buttons */
+        .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 15px; }
+        .icon-box { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.2rem; }
+        .action-item p { font-size: 0.65rem; font-weight: bold; margin: 0; }
+
+        /* Overlays */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: none; flex-direction: column; overflow-y: auto; }
+        .overlay-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; font-weight: bold; }
+        .form-area { padding: 20px; }
+        .input-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+        
+        .upi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .upi-btn { padding: 12px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="mobile-frame">
+    <div class="atm-container">
+        <div class="atm-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-style: italic; font-weight: bold;">Ceriyar Wallet</span>
+                <i class="fab fa-cc-visa fa-2x"></i>
+            </div>
+            <div class="card-chip"></div>
+            <div class="card-number" id="cardPhone">XXXX XXXX XXXX</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <p style="font-size: 0.6rem; opacity: 0.8; margin: 0;">CARD HOLDER</p>
+                    <div class="card-holder" id="cardName">CERIYAR AGENT</div>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-size: 0.6rem; opacity: 0.8; margin: 0;">BALANCE</p>
+                    <div class="bal-amt" id="mainBalance">₹0.00</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="action-item" onclick="openPage('dep')"><div class="icon-box"><i class="fas fa-wallet"></i></div><p>DEPOSIT</p></div>
+                <div class="action-item" onclick="openPage('wit')"><div class="icon-box"><i class="fas fa-money-bill-wave"></i></div><p>WITHDRAW</p></div>
+                <div class="action-item" onclick="openPage('bnk')"><div class="icon-box"><i class="fas fa-university"></i></div><p>BANK</p></div>
+                <div class="action-item" onclick="openPage('his')"><div class="icon-box"><i class="fas fa-history"></i></div><p>HISTORY</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="bnk" class="overlay">
+    <div class="overlay-header"><i class="fas fa-arrow-left" onclick="closePage('bnk')"></i> Bank & Profile</div>
+    <div class="form-area">
+        <label style="font-size: 0.8rem; color:#666;">Select Bank First:</label>
+        <select id="b-name" class="input-box">
+            <option value="" disabled selected>Choose Your Bank</option>
+            <option>State Bank of India</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Paytm Payments Bank</option>
+            <option>Airtel Payments Bank</option>
+            <option>Punjab National Bank</option>
+        </select>
+        <input type="text" id="b-hold" class="input-box" placeholder="Your Full Name (ATM Card Name)">
+        <input type="number" id="b-mob" class="input-box" placeholder="Mobile Number (ATM Card No.)">
+        <input type="number" id="b-acc" class="input-box" placeholder="Bank Account Number">
+        <input type="text" id="b-ifsc" class="input-box" placeholder="IFSC Code">
+        <button class="btn" style="background:var(--success)" onclick="doBank()">UPDATE PROFILE & CARD</button>
+    </div>
+</div>
+
+<div id="dep" class="overlay">
+    <div class="overlay-header"><i class="fas fa-arrow-left" onclick="closePage('dep')"></i> Add Money (₹300)</div>
+    <div class="form-area">
+        <div class="upi-grid">
+            <div class="upi-btn" onclick="payVia()" style="color:#5f259f"><i class="fas fa-bolt"></i> PhonePe</div>
+            <div class="upi-btn" onclick="payVia()" style="color:#4285F4"><i class="fab fa-google-pay fa-lg"></i> G-Pay</div>
+            <div class="upi-btn" onclick="payVia()" style="color:#00baf2"><i class="fas fa-wallet"></i> Paytm</div>
+            <div class="upi-btn" onclick="payVia()" style="color:#ff9900"><i class="fab fa-amazon"></i> Amazon</div>
+        </div>
+        <input type="number" id="utr" class="input-box" placeholder="Enter 12 Digit UTR Number">
+        <button class="btn" style="background:var(--primary)" onclick="doDeposit()">SUBMIT PAYMENT</button>
+    </div>
+</div>
+
+<div id="wit" class="overlay">
+    <div class="overlay-header"><i class="fas fa-arrow-left" onclick="closePage('wit')"></i> Withdraw Money</div>
+    <div class="form-area">
+        <p style="color:red; font-size:0.8rem; font-weight:bold;">* Limit: ₹200 to ₹5000</p>
+        <input type="number" id="w-amt" class="input-box" placeholder="Enter Amount (200 - 5000)">
+        <button class="btn" style="background:var(--danger)" onclick="doWithdraw()">WITHDRAW NOW</button>
+    </div>
+</div>
+
+<div id="his" class="overlay">
+    <div class="overlay-header"><i class="fas fa-arrow-left" onclick="closePage('his')"></i> Transactions History</div>
+    <div id="historyList" style="padding:15px;"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC71sziJtMeDStHKguWtKmqlXe7vPp9Sn0",
+        authDomain: "login-wallet-701fc.firebaseapp.com",
+        databaseURL: "https://login-wallet-701fc-default-rtdb.firebaseio.com",
+        projectId: "login-wallet-701fc",
+        storageBucket: "login-wallet-701fc.firebasestorage.app",
+        messagingSenderId: "897194192275",
+        appId: "1:897194192275:web:8ec6b67f49ba7c925b4c66"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const uid = "9876";
+
+    // Balance & Card Live Update
+    onValue(ref(db, `gangaUsers/${uid}`), (s) => {
+        const data = s.val();
+        if(data) {
+            document.getElementById('mainBalance').innerText = "₹" + (data.earning || 0).toFixed(2);
+            if(data.bank) {
+                document.getElementById('cardName').innerText = data.bank.holder || "CERIYAR AGENT";
+                const mob = data.bank.mobile || "0000000000";
+                document.getElementById('cardPhone').innerText = `XXXX XXXX ${mob.slice(-4)}`;
+            }
+        }
+    });
+
+    window.payVia = () => {
+        window.location.href = "upi://pay?pa=9329410931@upi&pn=CeriyarAgent&am=300&cu=INR";
+    };
+
+    window.doBank = async () => {
+        const b = { 
+            bank: document.getElementById('b-name').value, 
+            holder: document.getElementById('b-hold').value,
+            mobile: document.getElementById('b-mob').value,
+            acc: document.getElementById('b-acc').value, 
+            ifsc: document.getElementById('b-ifsc').value 
+        };
+        if(!b.bank || !b.holder || !b.mobile) return alert("कृपया बैंक, नाम और मोबाइल नंबर भरें!");
+        await update(ref(db, `gangaUsers/${uid}/bank`), b);
+        alert("ATM Profile & Bank Details Updated!"); 
+        closePage('bnk');
+    };
+
+    window.doDeposit = async () => {
+        const u = document.getElementById('utr').value;
+        if(u.length < 12) return alert("Enter 12 Digit Correct UTR");
+        await push(ref(db, 'depositRequests'), { userId: uid, utr: u, amount: 300, status: 'Pending', type: 'Deposit', date: new Date().toLocaleString() });
+        alert("Payment Submitted! Wait for Approval."); closePage('dep');
+    };
+
+    window.doWithdraw = async () => {
+        const a = parseFloat(document.getElementById('w-amt').value);
+        // Condition for 200 - 5000
+        if(isNaN(a) || a < 200 || a > 5000) return alert("Withdrawal Limit: ₹200 - ₹5000");
+        
+        const snap = await get(ref(db, `gangaUsers/${uid}`));
+        const currentBal = snap.val()?.earning || 0;
+        
+        if(a > currentBal) return alert("बैलेंस कम है!");
+
+        await update(ref(db, `gangaUsers/${uid}`), { earning: currentBal - a });
+        await push(ref(db, 'withdrawRequests'), { userId: uid, amount: a, status: 'Pending', type: 'Withdraw', date: new Date().toLocaleString() });
+        alert("Withdrawal Requested Successfully!"); closePage('wit');
+    };
+
+    // History rendering
+    onValue(ref(db, 'depositRequests'), () => renderHistory());
+    onValue(ref(db, 'withdrawRequests'), () => renderHistory());
+    async function renderHistory() {
+        const hList = document.getElementById('historyList');
+        const dS = await get(ref(db, 'depositRequests'));
+        const wS = await get(ref(db, 'withdrawRequests'));
+        let all = [];
+        dS.forEach(s => { if(s.val().userId === uid) all.push(s.val()); });
+        wS.forEach(s => { if(s.val().userId === uid) all.push(s.val()); });
+        all.sort((a,b) => new Date(b.date) - new Date(a.date));
+        hList.innerHTML = all.map(t => `<div style="padding:12px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; background:#fff; margin-bottom:5px; border-radius:8px;">
+            <div><b style="color:var(--primary)">${t.type}</b><br><small style="color:#888">${t.date}</small></div>
+            <div style="text-align:right"><b>₹${t.amount}</b><br><small style="color:${t.status=='Pending'?'orange':'green'}; font-weight:bold;">${t.status}</small></div>
+        </div>`).join('') || "<p style='text-align:center; color:#888;'>No History</p>";
+    }
+</script>
+
+<script>
+    function openPage(id) { document.getElementById(id).style.display = 'flex'; }
+    function closePage(id) { document.getElementById(id).style.display = 'none'; }
+</script>
+</body>
+</html>

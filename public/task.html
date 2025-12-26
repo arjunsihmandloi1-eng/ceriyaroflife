@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Tasks - Career of Life</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root { --primary: #008800; --gold: #ffeb3b; --success: #27ae60; --bg: #f4f4f5; }
+    body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding-bottom: 30px; }
+    .task-header { background: var(--primary); color: white; padding: 25px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .daily-reward { background: white; margin: 15px; border-radius: 15px; padding: 15px; text-align: center; border: 2px dashed var(--gold); }
+    .reward-grid { display: flex; justify-content: space-between; margin-top: 10px; }
+    .day-box { background: #f0f0f0; padding: 8px; border-radius: 8px; flex: 1; margin: 0 2px; font-size: 10px; font-weight: bold; color: #888; border: 1px solid #ddd; }
+    .day-box.active { background: var(--gold); color: black; border-color: #d4af37; }
+    .day-box.completed { background: var(--success); color: white; border-color: #1e8449; }
+    .task-container { padding: 15px; }
+    .task-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
+    .task-info { display: flex; align-items: center; gap: 15px; }
+    .task-icon { width: 45px; height: 45px; background: #e8f5e9; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 20px; }
+    .task-text b { display: block; font-size: 15px; color: #333; }
+    .task-text span { font-size: 12px; color: #666; }
+    .btn-action { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+    .btn-action:disabled { background: #ccc; cursor: not-allowed; }
+    #quiz-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+    .quiz-box { background: white; width: 85%; padding: 25px; border-radius: 20px; text-align: center; }
+    .opt-btn { background: #f8f9fa; border: 2px solid #eee; padding: 12px; width: 100%; margin: 8px 0; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <div class="task-header">
+    <a href="Index.html" style="color: white; position: absolute; left: 20px; top: 30px; text-decoration: none;"><i class="fas fa-arrow-left"></i></a>
+    <h2 style="margin:0;">डेली टास्क</h2>
+  </div>
+
+  <div class="daily-reward">
+    <b>📅 डेली अटेंडेंस</b>
+    <div class="reward-grid" id="attendance-grid">
+      <div class="day-box" id="d1">D1</div><div class="day-box" id="d2">D2</div><div class="day-box" id="d3">D3</div>
+      <div class="day-box" id="d4">D4</div><div class="day-box" id="d5">D5</div><div class="day-box" id="d6">D6</div>
+      <div class="day-box" id="d7">D7</div>
+    </div>
+    <button id="checkin-btn" class="btn-action" style="width: 100%; margin-top: 15px;" onclick="markAttendance()">उपस्थिति दर्ज करें</button>
+  </div>
+
+  <div class="task-container">
+    <div class="task-card">
+      <div class="task-info">
+        <div class="task-icon" style="color: #ff0000; background: #ffebee;"><i class="fab fa-youtube"></i></div>
+        <div class="task-text"><b>यूट्यूब वीडियो</b><span id="yt-status">नया अपडेट देखें</span></div>
+      </div>
+      <button class="btn-action" onclick="playYT()">देखें</button>
+    </div>
+
+    <div class="task-card">
+      <div class="task-info">
+        <div class="task-icon" style="color: #4285f4; background: #e3f2fd;"><i class="fas fa-question-circle"></i></div>
+        <div class="task-text"><b>डेली क्विज़</b><span>अपना ज्ञान परखें</span></div>
+      </div>
+      <button class="btn-action" onclick="showQuiz()">खेलें</button>
+    </div>
+  </div>
+
+  <div id="quiz-popup">
+    <div class="quiz-box">
+      <h3 id="q-text">Sawal loading...</h3>
+      <div id="quiz-options"></div>
+    </div>
+  </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyC71sziJtMeDStHKguWtKmqlXe7vPp9Sn0",
+        authDomain: "login-wallet-701fc.firebaseapp.com",
+        databaseURL: "https://login-wallet-701fc-default-rtdb.firebaseio.com",
+        projectId: "login-wallet-701fc",
+        storageBucket: "login-wallet-701fc.firebasestorage.app",
+        messagingSenderId: "897194192275",
+        appId: "1:897194192275:web:8ec6b67f49ba7c925b4c66",
+        measurementId: "G-HS6CHWY49Q"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const userId = "9876"; // इसे लॉगिन के बाद डायनामिक बदलें
+
+    // UI Update and Attendance Load
+    function updateUI() {
+        const today = new Date().toDateString();
+        onValue(ref(db, `gangaUsers/${userId}`), (snapshot) => {
+            const userData = snapshot.val() || {};
+            const att = userData.attendance || { lastDate: "", count: 0 };
+            const btn = document.getElementById('checkin-btn');
+
+            if (att.lastDate === today) {
+                btn.innerText = "आज की उपस्थिति दर्ज है ✅";
+                btn.disabled = true;
+            }
+
+            for (let i = 1; i <= 7; i++) {
+                const box = document.getElementById('d' + i);
+                box.classList.remove('completed', 'active');
+                if (i <= att.count) box.classList.add('completed');
+                else if (i === att.count + 1) box.classList.add('active');
+            }
+        });
+    }
+
+    // Mark Attendance & Reward Money
+    window.markAttendance = async function() {
+        const today = new Date().toDateString();
+        const userRef = ref(db, `gangaUsers/${userId}`);
+        const snap = await get(userRef);
+        const userData = snap.val() || {};
+        const att = userData.attendance || { lastDate: "", count: 0 };
+
+        if (att.lastDate === today) return;
+
+        let newCount = (att.count >= 7) ? 1 : att.count + 1;
+        let reward = 2; // Attendance Reward ₹2
+
+        await update(userRef, {
+            earning: (parseFloat(userData.earning) || 0) + reward,
+            attendance: { lastDate: today, count: newCount }
+        });
+        alert(`उपस्थिति दर्ज! आपको ₹${reward} मिले।`);
+    }
+
+    // Play YouTube from Admin Link
+    window.playYT = function() {
+        onValue(ref(db, 'adminSettings/dailyVideoLink'), (snapshot) => {
+            const link = snapshot.val();
+            if(link) window.open(link, '_blank');
+            else alert("वीडियो लिंक उपलब्ध नहीं है");
+        }, { onlyOnce: true });
+    }
+
+    // Show Quiz from Admin Data
+    window.showQuiz = function() {
+        onValue(ref(db, 'adminSettings/dailyQuiz'), (snapshot) => {
+            const quiz = snapshot.val();
+            if(!quiz || !quiz.question) return alert("आज कोई क्विज़ नहीं है!");
+            
+            document.getElementById('q-text').innerText = quiz.question;
+            document.getElementById('quiz-options').innerHTML = `
+                <button class="opt-btn" onclick="checkAns('A')">${quiz.a}</button>
+                <button class="opt-btn" onclick="checkAns('B')">${quiz.b}</button>
+                <button class="opt-btn" onclick="checkAns('C')">${quiz.c}</button>
+                <button class="opt-btn" onclick="checkAns('D')">${quiz.d}</button>
+            `;
+            document.getElementById('quiz-popup').style.display = 'flex';
+        }, { onlyOnce: true });
+    }
+
+    // Check Answer & Reward Money
+    window.checkAns = async function(ans) {
+        const quizSnap = await get(ref(db, 'adminSettings/dailyQuiz'));
+        const quiz = quizSnap.val();
+        
+        if(ans === quiz.answer) {
+            const userRef = ref(db, `gangaUsers/${userId}`);
+            const userSnap = await get(userRef);
+            let currentBal = parseFloat(userSnap.val().earning) || 0;
+            
+            await update(userRef, { earning: currentBal + 5 }); // Correct Ans Reward ₹5
+            alert("सही जवाब! ₹5 जोड़ दिए गए। ✅");
+        } else {
+            alert("गलत जवाब! फिर कोशिश करें। ❌");
+        }
+        document.getElementById('quiz-popup').style.display = 'none';
+    }
+
+    window.onload = updateUI;
+</script>
+</body>
+</html>

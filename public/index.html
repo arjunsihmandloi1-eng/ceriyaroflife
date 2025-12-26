@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career of Life - लॉगिन और पंजीकरण</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --primary: #008800; --dark: #001282; --bg: #f4f4f5; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .auth-container { width: 90%; max-width: 400px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .auth-header { background: var(--primary); padding: 30px; text-align: center; color: white; }
+        .auth-body { padding: 25px; text-align: center; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 12px; color: var(--primary); }
+        .input-group input { width: 100%; padding: 12px 12px 12px 45px; border: 1px solid #ddd; border-radius: 10px; outline: none; box-sizing: border-box; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .toggle-text { margin-top: 15px; font-size: 14px; color: #666; cursor: pointer; }
+        .toggle-text b { color: var(--primary); text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-header">
+        <i class="fas fa-user-circle fa-4x"></i>
+        <h2 id="auth-title">प्रवेश करें (Login)</h2>
+    </div>
+    
+    <div class="auth-body">
+        <div id="login-section">
+            <div class="input-group"><i class="fas fa-phone-alt"></i><input type="number" id="lMobile" placeholder="मोबाइल नंबर"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="lPass" placeholder="पासवर्ड"></div>
+            <button id="lBtn" class="btn-main" onclick="handleAuth('login')">लॉगिन करें</button>
+            <p class="toggle-text">अकाउंट नहीं है? <b onclick="toggleView('reg')">नया पंजीकरण करें</b></p>
+        </div>
+
+        <div id="reg-section" style="display:none;">
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="rName" placeholder="पूरा नाम"></div>
+            <div class="input-group"><i class="fas fa-phone-alt"></i><input type="number" id="rMobile" placeholder="मोबाइल नंबर"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="rPass" placeholder="पासवर्ड बनाएं"></div>
+            <button id="rBtn" class="btn-main" onclick="handleAuth('reg')">रजिस्टर करें</button>
+            <p class="toggle-text">पहले से अकाउंट है? <b onclick="toggleView('login')">यहाँ लॉगिन करें</b></p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC71sziJtMeDStHKguWtKmqlXe7vPp9Sn0",
+      authDomain: "login-wallet-701fc.firebaseapp.com",
+      databaseURL: "https://login-wallet-701fc-default-rtdb.firebaseio.com",
+      projectId: "login-wallet-701fc",
+      storageBucket: "login-wallet-701fc.firebasestorage.app",
+      messagingSenderId: "897194192275",
+      appId: "1:897194192275:web:8ec6b67f49ba7c925b4c66"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // लॉगिन और पंजीकरण के बीच बदलने के लिए
+    window.toggleView = (view) => {
+        document.getElementById('login-section').style.display = view === 'login' ? 'block' : 'none';
+        document.getElementById('reg-section').style.display = view === 'reg' ? 'block' : 'none';
+        document.getElementById('auth-title').innerText = view === 'reg' ? 'नया पंजीकरण' : 'प्रवेश करें (Login)';
+    };
+
+    // मुख्य अथॉरिटी फंक्शन
+    window.handleAuth = async (type) => {
+        const btn = type === 'login' ? document.getElementById('lBtn') : document.getElementById('rBtn');
+        const originalText = btn.innerText;
+
+        // बटन को फ्रीज करें और "प्रतीक्षा करें" दिखाएँ
+        btn.disabled = true;
+        btn.innerText = "कृपया प्रतीक्षा करें...";
+        btn.style.opacity = "0.7";
+
+        try {
+            if(type === 'reg') {
+                const name = document.getElementById('rName').value.trim();
+                const mobile = document.getElementById('rMobile').value.trim();
+                const pass = document.getElementById('rPass').value.trim();
+
+                if(!name || mobile.length < 10 || !pass) {
+                    throw new Error("कृपया सभी जानकारी सही-सही भरें!");
+                }
+                
+                const userRef = ref(db, `gangaUsers/${mobile}`);
+                const snap = await get(userRef);
+                
+                if(snap.exists()) {
+                    throw new Error("यह मोबाइल नंबर पहले से पंजीकृत है! कृपया लॉगिन करें।");
+                }
+
+                // नया पंजीकरण डेटाबेस में डालना
+                await set(userRef, { 
+                    name: name, 
+                    password: pass, 
+                    earning: 0, 
+                    team: 0,
+                    status: 'active' 
+                });
+
+                localStorage.setItem("gangaUserId", mobile);
+                alert("पंजीकरण सफल रहा!");
+                window.location.href = "webpeg.html"; 
+
+            } else {
+                const mobile = document.getElementById('lMobile').value.trim();
+                const pass = document.getElementById('lPass').value.trim();
+
+                if(!mobile || !pass) {
+                    throw new Error("कृपया मोबाइल नंबर और पासवर्ड डालें!");
+                }
+
+                const userRef = ref(db, `gangaUsers/${mobile}`);
+                const snap = await get(userRef);
+                
+                // सुरक्षा नियम: चेक करें कि क्या यूजर रजिस्टर है
+                if(!snap.exists()) {
+                    throw new Error("यह मोबाइल नंबर पंजीकृत नहीं है! कृपया पहले 'नया पंजीकरण' करें।");
+                }
+
+                // पासवर्ड मिलान
+                if(snap.val().password === pass) {
+                    localStorage.setItem("gangaUserId", mobile);
+                    alert("लॉगिन सफल!");
+                    window.location.href = "webpeg.html"; 
+                } else {
+                    throw new Error("गलत पासवर्ड! कृपया पुनः प्रयास करें।");
+                }
+            }
+        } catch (error) {
+            alert(error.message);
+            // गलती होने पर बटन को वापस चालू करें
+            btn.disabled = false;
+            btn.innerText = originalText;
+            btn.style.opacity = "1";
+        }
+    };
+</script>
+</body>
+</html>

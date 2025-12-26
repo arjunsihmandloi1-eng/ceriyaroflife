@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career of Life - Fixed Network</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root { --primary: #008800; --dark-blue: #001282; --gold: #ffeb3b; --success: #27ae60; --bg: #f4f4f5; }
+    body { margin: 70px 0 90px 0; font-family: 'Poppins', sans-serif; background: var(--bg); overflow-x: hidden; }
+    #header { position: fixed; top: 0; left: 0; width: 100%; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; box-sizing: border-box; }
+    .logo-area { display: flex; align-items: center; font-size: 18px; font-weight: bold; }
+    .upload-label { background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; margin-right: 10px; cursor: pointer; color: var(--primary); }
+    .menu-container { position: relative; }
+    #myDropdown { display: none; position: absolute; right: 0; top: 35px; background: white; min-width: 160px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2000; }
+    #myDropdown a { color: #333; padding: 12px 16px; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 14px; border-bottom: 1px solid #eee; }
+    
+    #home-content { text-align: center; display: block; }
+    .search-container { margin: 20px 15px; display: flex; justify-content: center; }
+    .search-form { display: flex; width: 100%; max-width: 450px; background: white; border-radius: 30px; border: 1px solid #ddd; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .search-box { flex: 1; height: 45px; border: none; padding: 0 15px; outline: none; }
+    .search-btn { background: #4285f4; color: white; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; }
+    
+    .button-row { display: flex; justify-content: center; gap: 8px; padding: 10px; }
+    .box { flex: 1; height: 75px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-weight: bold; text-decoration: none; font-size: 13px; }
+    #red { background: #FF4C4C; } #blue { background: #4C9AFF; } #yellow { background: #FFD700; color: black; }
+    #green-btn { background: #28A745; width: 60%; margin: 10px auto; height: 50px; display: flex; align-items: center; justify-content: center; color: white; border-radius: 10px; text-decoration: none; font-weight: bold; }
+    
+    .subject-section { background: white; margin: 15px; padding: 15px; border-radius: 15px; text-align: center; }
+    .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .sub-item { background: #f8f8f8; padding: 12px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; font-size: 14px; border: 1px solid #eee; }
+    
+    /* --- Network Panel Styles --- */
+    #network-panel { display: none; text-align: left; }
+    .top-nav { background: var(--dark-blue); padding: 30px 20px; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; text-align: center; }
+    .main-balance { font-size: 2.5rem; font-weight: bold; color: var(--gold); margin: 5px 0; }
+    .btn-withdraw { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    
+    .action-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; margin-top: -25px; }
+    .action-item { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .action-item i { font-size: 1.5rem; color: var(--dark-blue); margin-bottom: 8px; }
+    
+    .section-title { padding: 20px 20px 10px; font-weight: bold; display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .level-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 10px 20px; scrollbar-width: none; }
+    .lvl-card { min-width: 140px; background: white; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #ddd; }
+    .lvl-card.active { border: 2px solid var(--dark-blue); background: #e3f2fd; }
+    
+    #footer { position: fixed; bottom: 0; width: 100%; height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 2px solid #eee; z-index: 1000; }
+    .footer-item { text-decoration: none; color: #555; text-align: center; flex: 1; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
+    .footer-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+    .icon-home { color: #FF0000; } .icon-wallet { color: #FFD700; } .icon-bonus { color: #FF4500; } .icon-network { color: #0000FF; }
+    .footer-item.active { border-top: 3px solid var(--primary); background: #f9f9f9; padding-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <header id="header">
+    <div class="logo-area"><div class="upload-label"><i class="fas fa-camera"></i></div> Career of Life</div>
+    <div class="menu-container">
+      <div style="font-size: 22px; cursor: pointer;" onclick="toggleMenu()"><i class="fas fa-ellipsis-v"></i></div>
+      <div id="myDropdown"><a href="#"><i class="fas fa-cog"></i> Setting</a><a href="#"><i class="fas fa-info-circle"></i> About Us</a></div>
+    </div>
+  </header>
+
+  <div id="home-content">
+    <h2 style="margin-top:20px; text-align: center;">📅 Career of Life</h2>
+    <div class="search-container">
+      <form action="https://www.google.com/search" method="GET" class="search-form">
+        <input type="text" name="q" class="search-box" placeholder="Google Search...">
+        <button type="submit" class="search-btn">🔍 Search</button>
+      </form>
+    </div>
+    <div class="button-row">
+      <a href="#" class="box" id="red">📚<br>Book</a>
+      <a href="#" class="box" id="blue">🎦<br>Videos</a>
+      <a href="task.html" class="box" id="yellow">📋<br>My Task</a>
+    </div>
+    <a href="tel:9329410931" id="green-btn"><i class="fas fa-phone-alt"></i> &nbsp; Phone</a>
+    
+    <div class="subject-section">
+        <h3 style="border-bottom: 3px solid var(--primary); display: inline-block; padding-bottom: 5px;">📖 All Subjects</h3>
+        <div class="sub-grid" id="main-subject-grid">
+            </div>
+    </div>
+  </div>
+
+  <div id="network-panel">
+    <div class="top-nav">
+        <span style="font-size:0.8rem; opacity:0.8;">उपलब्ध कमीशन</span>
+        <div class="main-balance" id="user-balance">₹0.00</div>
+        <button class="btn-withdraw" onclick="window.location.href='wallet.html'">Withdraw</button>
+    </div>
+    
+    <div class="action-cards">
+        <div class="action-item">
+            <i class="fas fa-users"></i><br>
+            <span>Direct (B)</span><br>
+            <b id="direct-count">0 लोग</b>
+        </div>
+        <div class="action-item">
+            <i class="fas fa-network-wired"></i><br>
+            <span>Team (C/D)</span><br>
+            <b id="team-count">0 लोग</b>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <span>अगला बोनस टारगेट</span>
+        <span style="color:var(--dark-blue);">Level 1</span>
+    </div>
+
+    <div class="level-scroller">
+        <div class="lvl-card active">
+            <small>Level 1</small><br><b>₹50</b>
+            <div style="background:#eee; height:5px; border-radius:3px; margin:8px 0;">
+                <div id="lvl-progress" style="background:var(--success); width:0%; height:100%;"></div>
+            </div>
+            <small id="lvl-status" style="font-size: 0.6rem;">0/2 लोग</small>
+        </div>
+        <div class="lvl-card"><small>Level 2</small><br><b>₹100</b><br><small style="color:#999;">लॉक है</small></div>
+        <div class="lvl-card"><small>Level 3</small><br><b>₹250</b><br><small style="color:#999;">लॉक है</small></div>
+    </div>
+
+    <div class="section-title"><span>हालिया टीम कमीशन</span></div>
+    <div id="recent-history" style="background: white; margin: 0 20px; padding: 20px; border-radius: 20px; text-align: center; color: #ccc; border: 1px dashed #ddd;">अभी कोई टीम डेटा नहीं है।</div>
+    
+    <div style="padding:20px;">
+        <button onclick="alert('Share link copied!')" style="background:var(--dark-blue); color:white; width:100%; border:none; padding:15px; border-radius:15px; font-weight:bold;">
+            <i class="fas fa-share-alt"></i> नया एजेंट जोड़ें (₹25)
+        </button>
+    </div>
+  </div>
+
+  <div id="footer">
+    <div id="btn-home" class="footer-item active" onclick="showPage('home')">
+        <i class="fas fa-home footer-icon icon-home"></i>Home
+    </div>
+    <a href="wallet.html" class="footer-item">
+        <i class="fas fa-wallet footer-icon icon-wallet"></i>Wallet
+    </a>
+    <a href="bons.html" class="footer-item">
+        <i class="fas fa-gift footer-icon icon-bonus"></i>Bonus
+    </a>
+    <div id="btn-net" class="footer-item" onclick="showPage('network')">
+        <i class="fas fa-network-wired footer-icon icon-network"></i>Network
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC71sziJtMeDStHKguWtKmqlXe7vPp9Sn0",
+      authDomain: "login-wallet-701fc.firebaseapp.com",
+      databaseURL: "https://login-wallet-701fc-default-rtdb.firebaseio.com",
+      projectId: "login-wallet-701fc",
+      storageBucket: "login-wallet-701fc.firebasestorage.app",
+      messagingSenderId: "897194192275",
+      appId: "1:897194192275:web:8ec6b67f49ba7c925b4c66",
+      measurementId: "G-HS6CHWY49Q"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function loadData() {
+        onValue(ref(db, 'adminSettings/subjects'), (snap) => {
+            const subs = snap.val() || ["हिन्दी", "गणित"];
+            document.getElementById('main-subject-grid').innerHTML = subs.map(s => `<a href="#" class="sub-item">${s}</a>`).join('');
+        });
+
+        const userId = "9876"; 
+        onValue(ref(db, 'gangaUsers/' + userId), (snap) => {
+            const data = snap.val();
+            if(data) {
+                document.getElementById('user-balance').innerText = "₹" + (parseFloat(data.earning) || 0).toFixed(2);
+                let direct = data.team || 0;
+                document.getElementById('direct-count').innerText = direct + " लोग";
+                
+                let percent = (direct / 2) * 100;
+                document.getElementById('lvl-progress').style.width = (percent > 100 ? 100 : percent) + "%";
+                document.getElementById('lvl-status').innerText = direct + "/2 लोग";
+            }
+        });
+    }
+
+    window.showPage = function(page) {
+      const home = document.getElementById('home-content');
+      const net = document.getElementById('network-panel');
+      const bHome = document.getElementById('btn-home');
+      const bNet = document.getElementById('btn-net');
+      if(page === 'home') { home.style.display = 'block'; net.style.display = 'none'; bHome.classList.add('active'); bNet.classList.remove('active'); }
+      else { home.style.display = 'none'; net.style.display = 'block'; bHome.classList.remove('active'); bNet.classList.add('active'); }
+      window.scrollTo(0,0);
+    }
+
+    window.toggleMenu = function() {
+        const drop = document.getElementById("myDropdown");
+        drop.style.display = (drop.style.display === "block") ? "none" : "block";
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
